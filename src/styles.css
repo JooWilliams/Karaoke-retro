@@ -1,0 +1,574 @@
+:root {
+  --bg: #120826;
+  --rosa: #ff2e97;
+  --ciano: #19e3ff;
+  --amar: #ffd23f;
+  --txt: #f6eeff;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  background: var(--bg);
+  color: var(--txt);
+  font-family: "Trebuchet MS", Verdana, sans-serif;
+  overflow: hidden;
+}
+.tela {
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background:
+    linear-gradient(transparent 62%, rgba(255, 46, 151, 0.25)),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 79px,
+      rgba(25, 227, 255, 0.07) 79px 80px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 79px,
+      rgba(25, 227, 255, 0.07) 79px 80px
+    );
+}
+.tela::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    transparent 0 2px,
+    rgba(0, 0, 0, 0.18) 2px 3px
+  );
+}
+header {
+  position: absolute;
+  top: 3vh;
+  left: 4vw;
+  right: 4vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 2;
+}
+h1 {
+  font:
+    italic 900 clamp(2rem, 4.5vw, 4.5rem) Impact,
+    "Arial Black",
+    sans-serif;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 18px var(--ciano);
+}
+h1 span {
+  color: var(--rosa);
+  text-shadow: 0 0 18px var(--rosa);
+}
+nav button {
+  font:
+    700 1.2rem Impact,
+    sans-serif;
+  margin-left: 0.6rem;
+  padding: 0.4rem 1.1rem;
+  background: none;
+  color: var(--ciano);
+  border: 2px solid var(--ciano);
+  cursor: pointer;
+}
+nav button.on {
+  background: var(--ciano);
+  color: var(--bg);
+  box-shadow: 0 0 16px var(--ciano);
+}
+.trilho {
+  display: flex;
+  gap: 20px;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  width: max-content;
+}
+.capa {
+  width: 320px;
+  height: 320px;
+  flex: none;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  text-align: left;
+  padding: 1.4rem;
+  color: var(--txt);
+  border: 3px solid transparent;
+  cursor: pointer;
+  opacity: 0.55;
+  transform: scale(0.88);
+  transition: 0.3s;
+  font-family: inherit;
+  background: linear-gradient(160deg, var(--c1), var(--c2));
+}
+.capa.foco {
+  opacity: 1;
+  transform: scale(1.14);
+  border-color: var(--amar);
+  box-shadow: 0 0 40px var(--c1);
+}
+.d80 {
+  --c1: #ff2e97;
+  --c2: #5a1a8c;
+}
+.d90 {
+  --c1: #19e3ff;
+  --c2: #1a3a8c;
+}
+.d2000 {
+  --c1: #ffd23f;
+  --c2: #c2410c;
+}
+.capa b {
+  position: absolute;
+  top: 1rem;
+  left: 1.4rem;
+  font:
+    900 3.2rem Impact,
+    sans-serif;
+  opacity: 0.9;
+}
+.capa strong {
+  font-size: 1.6rem;
+}
+.capa em {
+  opacity: 0.8;
+}
+footer {
+  position: absolute;
+  bottom: 3vh;
+  width: 100%;
+  text-align: center;
+  opacity: 0.7;
+  letter-spacing: 0.08em;
+  z-index: 2;
+}
+.player {
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+.player small {
+  color: var(--ciano);
+  font-size: 1.4rem;
+  letter-spacing: 0.2em;
+}
+.player h2 {
+  font:
+    italic 900 clamp(3rem, 7vw, 7rem) Impact,
+    sans-serif;
+  color: var(--amar);
+  text-shadow: 0 0 24px var(--rosa);
+}
+.eq {
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+  height: 90px;
+}
+.eq i {
+  width: 14px;
+  height: 12px;
+  background: var(--rosa);
+  box-shadow: 0 0 10px var(--rosa);
+}
+.eq i.anda {
+  animation: eq 0.6s ease-in-out infinite alternate;
+}
+@keyframes eq {
+  to {
+    height: 90px;
+    background: var(--ciano);
+  }
+}
+.barra {
+  width: 70vw;
+  height: 14px;
+  border: 2px solid var(--ciano);
+}
+.barra div {
+  height: 100%;
+  background: var(--ciano);
+  box-shadow: 0 0 12px var(--ciano);
+}
+.tempo {
+  width: 70vw;
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.5rem;
+}
+.arq {
+  border: 2px dashed var(--amar);
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  color: var(--amar);
+  z-index: 3;
+}
+.arq input {
+  display: none;
+}
+.aviso {
+  opacity: 0.7;
+}
+.erro {
+  color: #ff6b6b;
+  font-weight: 700;
+}
+.painel {
+  padding: 2rem;
+  max-width: 760px;
+}
+.painel p {
+  margin-top: 1rem;
+  line-height: 1.5;
+}
+.vazio {
+  position: absolute;
+  top: 40%;
+  width: 100%;
+  text-align: center;
+  font-size: 1.8rem;
+  opacity: 0.8;
+  line-height: 1.6;
+}
+.capa u {
+  position: absolute;
+  top: 1.2rem;
+  right: 1rem;
+  color: var(--amar);
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+.capa small {
+  color: var(--amar);
+}
+.letra {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 1rem 0;
+  min-height: 40vh;
+  justify-content: center;
+  z-index: 3;
+}
+.l {
+  --f: var(--amar);
+  --u: #fff;
+  font:
+    900 clamp(2rem, 4.6vw, 4.4rem) "Arial Black",
+    sans-serif;
+  text-shadow: 0 0 0 transparent;
+}
+.l.v1 {
+  --f: var(--ciano);
+}
+.l.futura {
+  color: var(--u);
+  opacity: 0.75;
+}
+.l.passada {
+  color: var(--f);
+  opacity: 0.4;
+}
+.l.atual {
+  background: linear-gradient(90deg, var(--f) var(--p), var(--u) var(--p));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transform: scale(1.06);
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.8));
+}
+.painel {
+  max-width: 980px;
+  margin: 0 auto;
+  overflow: auto;
+  height: 100%;
+  font-size: 1rem;
+}
+.painel h1 {
+  font-size: 2.4rem;
+}
+.abas {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+.painel button {
+  font:
+    700 0.95rem Verdana,
+    sans-serif;
+  margin: 0.25rem 0.3rem 0.25rem 0;
+  padding: 0.45rem 0.9rem;
+  background: none;
+  color: var(--ciano);
+  border: 2px solid var(--ciano);
+  cursor: pointer;
+}
+.painel button.on {
+  background: var(--ciano);
+  color: var(--bg);
+}
+.painel button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.card {
+  border: 2px solid var(--rosa);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.card h3 {
+  color: var(--amar);
+}
+.card input,
+.card select,
+.card textarea {
+  padding: 0.5rem;
+  background: #1e0f3d;
+  color: var(--txt);
+  border: 1px solid var(--ciano);
+  font: inherit;
+}
+.lin {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+.lin span {
+  flex: 1;
+  min-width: 260px;
+}
+.lin.prox {
+  color: var(--amar);
+  font-weight: 700;
+}
+.nome-in {
+  font:
+    900 3rem Impact,
+    sans-serif;
+  text-align: center;
+  width: min(70vw, 800px);
+  padding: 0.6rem;
+  background: #1e0f3d;
+  color: var(--amar);
+  border: 3px solid var(--ciano);
+  z-index: 3;
+  outline: none;
+}
+.toast {
+  position: absolute;
+  top: 14vh;
+  width: 100%;
+  text-align: center;
+  font-size: 1.6rem;
+  color: var(--amar);
+  z-index: 3;
+}
+.nota {
+  font:
+    900 14rem/1 Impact,
+    sans-serif;
+  color: var(--amar);
+  text-shadow: 0 0 40px var(--rosa);
+}
+.pos {
+  font-size: 2.4rem;
+  color: var(--ciano);
+  z-index: 3;
+}
+.rkTela {
+  padding: 12vh 5vw 8vh;
+  justify-content: flex-start;
+}
+.rkTela .abas {
+  margin: 0.5rem 0 1rem;
+  z-index: 3;
+}
+.ranking .abas {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+}
+.ranking .abas button {
+  font:
+    700 1rem Impact,
+    sans-serif;
+  padding: 0.4rem 1rem;
+  background: none;
+  color: var(--ciano);
+  border: 2px solid var(--ciano);
+  cursor: pointer;
+}
+.ranking .abas button.on {
+  background: var(--ciano);
+  color: var(--bg);
+}
+.rk {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  z-index: 3;
+  position: relative;
+}
+.rk li {
+  display: grid;
+  grid-template-columns: 3rem 1fr 2fr 4rem 7rem;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.8rem;
+  background: rgba(255, 255, 255, 0.07);
+  border-left: 4px solid var(--ciano);
+}
+.rk li i {
+  font-style: normal;
+  font-size: 1.5rem;
+}
+.rk li em {
+  font:
+    900 1.6rem Impact,
+    sans-serif;
+  color: var(--amar);
+  font-style: normal;
+  text-align: right;
+}
+.rk li small {
+  opacity: 0.6;
+}
+.rk li.p1 {
+  border-color: #ffd23f;
+  background: rgba(255, 210, 63, 0.22);
+  font-size: 1.5em;
+  box-shadow: 0 0 22px rgba(255, 210, 63, 0.4);
+}
+.rk li.p2 {
+  border-color: #cfd8e3;
+  background: rgba(207, 216, 227, 0.16);
+  font-size: 1.3em;
+}
+.rk li.p3 {
+  border-color: #d98b4a;
+  background: rgba(217, 139, 74, 0.18);
+  font-size: 1.15em;
+}
+.cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.cols .rk li {
+  grid-template-columns: 2rem 1fr 3rem;
+}
+.cols .rk li span,
+.cols .rk li small {
+  display: none;
+}
+.ranking .cols h3 {
+  color: var(--amar);
+  margin: 0.4rem 0;
+}
+.gear {
+  position: fixed;
+  left: 1.2rem;
+  bottom: 1.2rem;
+  z-index: 50;
+  font-size: 2.2rem;
+  line-height: 1;
+  width: 3.4rem;
+  height: 3.4rem;
+  background: rgba(18, 8, 38, 0.7);
+  color: var(--ciano);
+  border: 2px solid var(--ciano);
+  border-radius: 50%;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: 0.2s;
+}
+.gear:hover {
+  opacity: 1;
+  transform: rotate(60deg);
+  box-shadow: 0 0 16px var(--ciano);
+}
+.mic {
+  position: absolute;
+  right: 2vw;
+  bottom: 5vh;
+  width: 120px;
+  height: 10px;
+  border: 1px solid var(--ciano);
+  z-index: 3;
+}
+.mic div {
+  height: 100%;
+  background: var(--rosa);
+}
+.medidor {
+  position: relative;
+  height: 18px;
+  border: 2px solid var(--ciano);
+}
+.medidor div {
+  height: 100%;
+  background: var(--ciano);
+}
+.medidor i {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 3px;
+  background: #ff3b3b;
+}
+.syncTopo {
+  position: sticky;
+  top: -2rem;
+  z-index: 5;
+  background: var(--bg);
+  padding: 2rem 0 0.6rem;
+  margin-top: -1rem;
+  border-bottom: 2px solid var(--rosa);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.syncTopo audio {
+  width: 100%;
+}
+.proximo {
+  font:
+    900 1.8rem "Arial Black",
+    sans-serif;
+  color: var(--amar);
+  padding: 0.4rem 0.8rem;
+  border: 2px solid var(--amar);
+}
+.proximo small {
+  display: block;
+  font:
+    700 0.8rem Verdana,
+    sans-serif;
+  color: var(--ciano);
+  letter-spacing: 0.1em;
+}
+.lin {
+  scroll-margin: 220px 0;
+}
+.lin.prox {
+  background: rgba(255, 210, 63, 0.15);
+}
