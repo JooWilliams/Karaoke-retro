@@ -5,6 +5,7 @@
   "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
+    "preiniciar": "node scripts/install-electron.cjs",
     "iniciar": "vite build && electron .",
     "dist": "vite build && electron-builder --win"
   },

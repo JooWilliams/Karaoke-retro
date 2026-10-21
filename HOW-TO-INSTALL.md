@@ -13,6 +13,8 @@ npm run iniciar
 
 Como alternativa, no Windows, execute `scripts\iniciar.bat`. O script instala as dependências se necessário e inicia o aplicativo.
 
+O primeiro início também precisa baixar o executável do Electron. No Windows, se o download pelo Node falhar, o comando tenta novamente usando o `curl` do próprio Windows e verifica o arquivo antes de instalar. É necessário que a rede permita acesso aos arquivos de release do GitHub.
+
 ## Gerar o instalador para Windows
 
 Na pasta do projeto, execute:
