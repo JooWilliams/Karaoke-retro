@@ -18,6 +18,7 @@ export function Painel({ fechar }: { fechar: () => void }) {
   const [cfgR, setCfg] = useLS<Cfg>("cfg", CFG0);
   const cfg = cfgDe(cfgR);
   const [sync, setSync] = useState<Musica | null>(null);
+  const [edit, setEdit] = useState<Musica | null>(null);
   const [nome, setNome] = useState(localStorage.getItem("ultimoNome") ?? "");
   const [pts, setPts] = useState(""), [aviso, setAviso] = useState("");
   const recarregar = () => listar().then(setMs);
@@ -67,13 +68,13 @@ export function Painel({ fechar }: { fechar: () => void }) {
             <button onClick={() => setFila(fila.filter((_, n) => n !== i))}>✕</button></div>)}
           {!fila.length && <p>Fila vazia. Os participantes entram pelo palco (Enter) ou pela aba Músicas.</p>}</div>
       </section>}
-      {aba === "musicas" && <section><Cadastro ok={recarregar} />
+      {aba === "musicas" && <section><Cadastro key={edit?.id ?? "nova"} edit={edit} ok={() => { setEdit(null); recarregar(); }} fim={() => setEdit(null)} />
         <div className="card"><h3>BIBLIOTECA</h3>
           <input placeholder="Nome do participante (para Cantar agora / + Fila)" maxLength={20} value={nome} onChange={(e) => setNome(e.target.value)} />
           {!ms.length && <p>Nenhuma música ainda.</p>}
           {ms.map((m) => <div className="lin" key={m.id}><span>{m.titulo} — {m.artista} ({m.decada}s) · {sincronizada(m.letra) ? "letra sincronizada" : m.letra.length ? "letra SEM sincronia" : "sem letra"}</span>
             <button onClick={() => cantar(m, true)}>Cantar agora</button><button onClick={() => cantar(m, false)}>+ Fila</button>
-            {m.letra.length > 0 && <button onClick={() => setSync(m)}>Sincronizar</button>}<button onClick={() => excluir(m)}>Excluir</button></div>)}</div></section>}
+            {m.letra.length > 0 && <button onClick={() => setSync(m)}>Sincronizar</button>}<button onClick={() => setEdit(m)}>Editar</button><button onClick={() => excluir(m)}>Excluir</button></div>)}</div></section>}
       {aba === "rank" && <section>
         <div className="card"><h3>REGRAS</h3>
           <label>Identificação do participante <select value={cfg.nome} onChange={(e) => setCfg({ ...cfg, nome: e.target.value as Cfg["nome"] })}>
@@ -88,37 +89,55 @@ export function Painel({ fechar }: { fechar: () => void }) {
   );
 }
 
-function Cadastro({ ok }: { ok: () => void }) {
+function Cadastro({ ok, edit, fim }: { ok: () => void; edit?: Musica | null; fim?: () => void }) {
   const vazio = { titulo: "", artista: "", decada: 90, categoria: "Louvor", texto: "" };
-  const [f, setF] = useState(vazio);
+  const textoOriginal = edit?.letra.map((l) => `${l.v === 1 ? "2: " : ""}${l.x}`).join("\n") ?? "";
+  const [f, setF] = useState(edit ? { titulo: edit.titulo, artista: edit.artista, decada: edit.decada, categoria: edit.categoria, texto: textoOriginal } : vazio);
   const [audio, setAudio] = useState<File | null>(null), [capa, setCapa] = useState<File | null>(null), [arq, setArq] = useState<File | null>(null);
   const [msg, setMsg] = useState(""), [k, setK] = useState(0);
   const enviarForm = async () => {
     setMsg("");
     if (!f.titulo.trim()) return setMsg("Informe o título.");
-    if (!audio) return setMsg("Escolha o arquivo de áudio (MP3 ou WAV).");
-    if (!/^audio\//.test(audio.type) && !/\.(mp3|wav)$/i.test(audio.name)) return setMsg("Formato de áudio não suportado. Use MP3 ou WAV.");
-    const toca = await new Promise<boolean>((r) => { const a = new Audio(URL.createObjectURL(audio)); a.onloadedmetadata = () => r(true); a.onerror = () => r(false); });
-    if (!toca) return setMsg("Este áudio está corrompido ou não pode ser reproduzido.");
+    const audioSalvo = audio ?? edit?.audio;
+    if (!audioSalvo) return setMsg("Escolha o arquivo de áudio (MP3 ou WAV).");
+    if (audio && (!/^audio\//.test(audio.type) && !/\.(mp3|wav)$/i.test(audio.name))) return setMsg("Formato de áudio não suportado. Use MP3 ou WAV.");
+    if (audio) {
+      const toca = await new Promise<boolean>((r) => { const a = new Audio(URL.createObjectURL(audio)); a.onloadedmetadata = () => r(true); a.onerror = () => r(false); });
+      if (!toca) return setMsg("Este áudio está corrompido ou não pode ser reproduzido.");
+    }
     if (capa && !capa.type.startsWith("image/")) return setMsg("A capa precisa ser uma imagem.");
     const txt = arq ? await arq.text() : f.texto;
-    const letra = txt.trim() ? lerLetra(arq?.name ?? "x.txt", txt) : [];
+    const letra = !arq && edit && txt === textoOriginal ? edit.letra : txt.trim() ? lerLetra(arq?.name ?? "x.txt", txt) : [];
     if (txt.trim() && !letra.length) return setMsg("Não encontrei versos válidos no arquivo de letra (LRC/SRT/TXT).");
-    try { await salvar({ titulo: f.titulo.trim(), artista: f.artista.trim(), decada: f.decada as 80 | 90 | 2000, categoria: f.categoria, audio, capa: capa ?? undefined, letra });
-      setMsg("Música salva!"); setF(vazio); setAudio(null); setCapa(null); setArq(null); setK(k + 1); ok();
+    try {
+      await salvar({
+        ...(edit ? { id: edit.id } : {}),
+        titulo: f.titulo.trim(),
+        artista: f.artista.trim(),
+        decada: f.decada as 80 | 90 | 2000,
+        categoria: f.categoria,
+        audio: audioSalvo,
+        capa: capa ?? (edit ? edit.capa : undefined),
+        letra
+      });
+      setMsg(edit ? "Música atualizada!" : "Música salva!");
+      if (!edit) { setF(vazio); setAudio(null); setCapa(null); setArq(null); }
+      setK(k + 1); ok();
     } catch { setMsg("Não foi possível salvar. Verifique o espaço em disco."); }
   };
   const set = (c: string) => (e: { target: { value: string } }) => setF({ ...f, [c]: e.target.value });
   return (
-    <div className="card" key={k}><h3>NOVA MÚSICA</h3>
+    <div className="card" key={k}><h3>{edit ? "EDITAR MÚSICA" : "NOVA MÚSICA"}</h3>
       <input placeholder="Título" value={f.titulo} onChange={set("titulo")} /><input placeholder="Artista ou grupo" value={f.artista} onChange={set("artista")} />
       <select value={f.decada} onChange={(e) => setF({ ...f, decada: +e.target.value })}><option value={80}>Anos 80</option><option value={90}>Anos 90</option><option value={2000}>Anos 2000</option></select>
       <input placeholder="Categoria (Louvor, Adoração...)" value={f.categoria} onChange={set("categoria")} />
-      <label>Áudio (MP3/WAV) <input type="file" accept="audio/*,.mp3,.wav" onChange={(e) => setAudio(e.target.files?.[0] ?? null)} /></label>
-      <label>Capa (opcional) <input type="file" accept="image/*" onChange={(e) => setCapa(e.target.files?.[0] ?? null)} /></label>
+      <label>{edit ? "Trocar áudio (opcional)" : "Áudio (MP3/WAV)"} <input type="file" accept="audio/*,.mp3,.wav" onChange={(e) => setAudio(e.target.files?.[0] ?? null)} /></label>
+      <label>{edit ? "Trocar capa (opcional)" : "Capa (opcional)"} <input type="file" accept="image/*" onChange={(e) => setCapa(e.target.files?.[0] ?? null)} /></label>
       <label>Letra: arquivo .lrc/.srt/.txt <input type="file" accept=".lrc,.srt,.txt" onChange={(e) => setArq(e.target.files?.[0] ?? null)} /></label>
       <textarea rows={5} placeholder={"ou cole a letra aqui, um verso por linha.\nPrefixe 1: ou 2: para alternar a cor de duas vozes."} value={f.texto} onChange={set("texto")} />
-      <button onClick={enviarForm}>Salvar música</button>{msg && <p className="aviso">{msg}</p>}
+      <button onClick={enviarForm}>{edit ? "Atualizar música" : "Salvar música"}</button>
+      {edit && <button onClick={fim}>Cancelar</button>}
+      {msg && <p className="aviso">{msg}</p>}
     </div>
   );
 }
