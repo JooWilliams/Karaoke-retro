@@ -149,13 +149,40 @@ function Sync({ m, fim }: { m: Musica; fim: () => void }) {
   const a = useRef<HTMLAudioElement>(null);
   const i = ls.findIndex((l) => l.t === null);
   const agora = () => Math.max(0, (a.current?.currentTime ?? 0) - lat);
-  const ultimo = () => (i < 0 ? ls.length : i) - 1;
-  const marcar = () => { if (i >= 0) setLs(ls.map((l, n) => (n === i ? { ...l, t: agora() } : l))); };
-  const marcarFim = () => { const j = ultimo(); if (j >= 0) setLs(ls.map((l, n) => (n === j ? { ...l, f: agora() } : l))); };
-  const desfazer = () => { const j = ultimo(); if (j >= 0) setLs(ls.map((l, n) => (n === j ? { ...l, t: null, f: undefined } : l))); };
+
+  const marcar = () => {
+    if (i >= 0) {
+      const novoTempo = agora();
+      setLs(ls.map((l, n) => {
+        if (n === i) return { ...l, t: novoTempo };
+        if (n === i - 1) return { ...l, f: novoTempo };
+        return l;
+      }));
+    }
+  };
+
+  const marcarFim = () => {
+    const ultimoMarcado = ls.map((l, n) => l.t !== null ? n : -1).reduce((a, b) => Math.max(a, b), -1);
+    if (ultimoMarcado >= 0) {
+      const novoFim = agora();
+      setLs(ls.map((l, n) => (n === ultimoMarcado ? { ...l, f: novoFim } : l)));
+    }
+  };
+
+  const desfazer = () => {
+    const ultimoMarcado = ls.map((l, n) => l.t !== null ? n : -1).reduce((a, b) => Math.max(a, b), -1);
+    if (ultimoMarcado >= 0) {
+      setLs(ls.map((l, n) => (n === ultimoMarcado ? { ...l, t: null, f: undefined } : l)));
+    }
+  };
+
   const deslocar = (d: number) => setLs(ls.map((l) => (l.t === null ? l : { ...l, t: Math.max(0, l.t + d), f: l.f === undefined ? undefined : Math.max(0, l.f + d) })));
-  // a lista acompanha o verso atual, sem precisar rolar a tela
-  useEffect(() => { document.getElementById("v" + (i < 0 ? ls.length - 1 : i))?.scrollIntoView({ block: "center", behavior: "smooth" }); }, [i]);
+
+  useEffect(() => {
+    const el = document.getElementById("v" + (i < 0 ? ls.length - 1 : i));
+    if (el) el.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [i]);
+
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement).matches("input")) return;
@@ -164,9 +191,12 @@ function Sync({ m, fim }: { m: Musica; fim: () => void }) {
       if (el && e.key === " ") { e.preventDefault(); el.paused ? el.play() : el.pause(); }
       if (el && e.key === "ArrowRight") el.currentTime += 5; if (el && e.key === "ArrowLeft") el.currentTime -= 5;
     };
-    addEventListener("keydown", h); return () => removeEventListener("keydown", h);
-  });
+    addEventListener("keydown", h);
+    return () => removeEventListener("keydown", h);
+  }, [ls, i]);
+
   const guardar = async () => { await salvar({ ...m, letra: ls }); fim(); };
+
   return (
     <main className="painel"><h1>SINCRONIZAR</h1>
       <div className="syncTopo">
@@ -179,7 +209,7 @@ function Sync({ m, fim }: { m: Musica; fim: () => void }) {
         <label>Compensação do tempo de reação (s): <input type="number" step={0.05} min={0} max={1} value={lat} onChange={(e) => setLat(+e.target.value)} /></label>
       </div>
       <p className="aviso">{m.titulo}. Teclas: ESPAÇO toca/pausa · ← → ±5 s · M início do verso · E fim do verso (opcional) · Z desfaz. Já estava sincronizada? Use "Tudo ±0,1 s".</p>
-      <div className="card">{ls.map((l, n) => <div id={"v" + n} key={n} className={`lin ${n === i ? "prox" : ""}`}><span>{l.t === null ? "--:--" : mmss(l.t)}{l.f !== undefined ? ` → ${mmss(l.f)}` : ""} · {l.x}</span></div>)}</div>
+      <div className="card">{ls.map((l, n) => <div id={"v" + n} key={n} className={`lin ${n === i ? "prox" : ""} ${l.t !== null ? "marcado" : ""}`}><span>{l.t === null ? "--:--" : mmss(l.t)}{l.f !== undefined ? ` → ${mmss(l.f)}` : ""} · {l.x}</span></div>)}</div>
     </main>
   );
 }

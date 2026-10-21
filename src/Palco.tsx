@@ -125,10 +125,11 @@ function Letra({ ls, t, bloco }: { ls: Linha[]; t: number; bloco: number }) {
   if (!ls.length) return <p className="aviso">Esta música não tem letra cadastrada.</p>;
   if (!sincronizada(ls)) return <div className="letra">{ls.slice(bloco * 4, bloco * 4 + 4).map((l, n) => <p key={n} className={`l v${l.v} atual`} style={{ ["--p" as string]: "100%" }}>{l.x}</p>)}</div>;
   let i = -1; ls.forEach((l, n) => { if ((l.t as number) <= t) i = n; });
-  const ini = Math.max(0, i - 1);
-  const fim = i >= 0 ? (ls[i].f ?? Math.min((ls[i + 1]?.t ?? (ls[i].t as number) + 4) as number, (ls[i].t as number) + Math.max(1.5, ls[i].x.length * 0.1))) : 1;
-  const p = i >= 0 ? Math.min(1, Math.max(0, (t - (ls[i].t as number)) / (fim - (ls[i].t as number)))) : 0;
-  return <div className="letra">{ls.slice(ini, ini + 4).map((l, n) => { const idx = ini + n;
+  const ini = i >= 0 ? i : 0;
+  const current = ls[ini];
+  const fim = i >= 0 ? (current.f ?? (ls[i + 1]?.t ?? (current.t as number) + 4)) : 1;
+  const p = i >= 0 ? Math.min(1, Math.max(0, (t - (current.t as number)) / (fim - (current.t as number)))) : 0;
+  return <div className="letra">{ls.slice(ini, ini + 3).map((l, n) => { const idx = ini + n;
     return <p key={idx} className={`l v${l.v} ${idx < i ? "passada" : idx === i ? "atual" : "futura"}`} style={{ ["--p" as string]: `${p * 100}%` }}>{l.x}</p>; })}</div>;
 }
 

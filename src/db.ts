@@ -26,11 +26,28 @@ const voz = (s: string): [string, 0 | 1] => { const m = /^([12]):\s*/.exec(s); r
 function lerLRC(txt: string): Linha[] {
   const o: Linha[] = [];
   for (const l of txt.split(/\r?\n/)) {
-    const tags = [...l.matchAll(/\[(\d+):(\d+(?:\.\d+)?)\]/g)];
-    const [x, v] = voz(l.replace(/\[[^\]]*\]/g, "").trim());
-    if (tags.length && x) for (const g of tags) o.push({ t: +g[1] * 60 + +g[2], x, v });
+    const tags = [...l.matchAll(/[\[<](\d+):(\d+(?:\.\d+)?)[\]>]/g)];
+    const textoLimpo = l.replace(/[\[<][^\]>]*[\]>]/g, "").trim();
+    if (!textoLimpo) continue;
+    const [x, v] = voz(textoLimpo);
+    if (tags.length) {
+      const t = +tags[0][1] * 60 + +tags[0][2];
+      const ultimo = o[o.length - 1];
+      if (ultimo && ultimo.x === x) {
+        // Se for a mesma frase, atualizamos o tempo de início para a primeira tag
+        // e podemos guardar a última tag como o fim da frase
+        const ultimaTag = tags[tags.length - 1];
+        ultimo.f = +ultimaTag[1] * 60 + +ultimaTag[2];
+      } else {
+        const ultimaTag = tags[tags.length - 1];
+        const tFim = tags.length > 1 ? +ultimaTag[1] * 60 + +ultimaTag[2] : undefined;
+        o.push({ t, x, v, f: tFim });
+      }
+    } else {
+      o.push({ t: null, x, v });
+    }
   }
-  return o.sort((a, b) => (a.t as number) - (b.t as number));
+  return o.sort((a, b) => (a.t ?? Infinity) - (b.t ?? Infinity));
 }
 function lerSRT(txt: string): Linha[] {
   return txt.replace(/\r/g, "").split(/\n\n+/).flatMap((b) => {
