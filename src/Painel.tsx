@@ -21,7 +21,40 @@ export function Painel({ fechar }: { fechar: () => void }) {
   const [edit, setEdit] = useState<Musica | null>(null);
   const [nome, setNome] = useState(localStorage.getItem("ultimoNome") ?? "");
   const [pts, setPts] = useState(""), [aviso, setAviso] = useState("");
-  const recarregar = () => listar().then(setMs);
+  const exportar = async (m: Musica) => {
+    const blobToBase64 = (blob: Blob) => new Promise<string>((res) => {
+      const r = new FileReader(); r.onloadend = () => res(r.result as string); r.readAsDataURL(blob);
+    });
+    const dados = {
+      ...m,
+      audio: await blobToBase64(m.audio),
+      capa: m.capa ? await blobToBase64(m.capa) : undefined,
+    };
+    const b = new Blob([JSON.stringify(dados)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(b); a.download = `${m.titulo}.json`; a.click();
+  };
+
+  const importar = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]; if (!f) return;
+    const t = await f.text();
+    try {
+      const d = JSON.parse(t);
+      const base64ToBlob = (b64: string) => {
+        const parts = b64.split(","); const mime = parts[0].match(/:(.*?);/)?.[1];
+        const bin = atob(parts[1]); const buf = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+        return new Blob([buf], { type: mime || "application/octet-stream" });
+      };
+      const m: Musica = {
+        ...d,
+        audio: base64ToBlob(d.audio),
+        capa: d.capa ? base64ToBlob(d.capa) : undefined,
+      };
+      await salvar(m); recarregar();
+      setAviso("Música importada com sucesso!");
+    } catch { setAviso("Erro ao importar música. Arquivo inválido."); }
+  };
   useAviso("v", recarregar);
   useAviso("vr", () => listarR().then(setRs));
   const tit = (id: number | null) => { const m = ms.find((x) => x.id === id); return m ? `${m.titulo} — ${m.artista}` : "(música removida)"; };
@@ -70,11 +103,19 @@ export function Painel({ fechar }: { fechar: () => void }) {
       </section>}
       {aba === "musicas" && <section><Cadastro key={edit?.id ?? "nova"} edit={edit} ok={() => { setEdit(null); recarregar(); }} fim={() => setEdit(null)} />
         <div className="card"><h3>BIBLIOTECA</h3>
-          <input placeholder="Nome do participante (para Cantar agora / + Fila)" maxLength={20} value={nome} onChange={(e) => setNome(e.target.value)} />
+          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
+            <input style={{ flex: 1 }} placeholder="Nome do participante (para Cantar agora / + Fila)" maxLength={20} value={nome} onChange={(e) => setNome(e.target.value)} />
+            <label className="arq" style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+              <span>📥 Importar Música</span>
+              <input type="file" accept=".json" onChange={importar} style={{ display: "none" }} />
+            </label>
+          </div>
           {!ms.length && <p>Nenhuma música ainda.</p>}
           {ms.map((m) => <div className="lin" key={m.id}><span>{m.titulo} — {m.artista} ({m.decada}s) · {sincronizada(m.letra) ? "letra sincronizada" : m.letra.length ? "letra SEM sincronia" : "sem letra"}</span>
             <button onClick={() => cantar(m, true)}>Cantar agora</button><button onClick={() => cantar(m, false)}>+ Fila</button>
-            {m.letra.length > 0 && <button onClick={() => setSync(m)}>Sincronizar</button>}<button onClick={() => setEdit(m)}>Editar</button><button onClick={() => excluir(m)}>Excluir</button></div>)}</div></section>}
+            {m.letra.length > 0 && <button onClick={() => setSync(m)}>Sincronizar</button>}
+            <button onClick={() => exportar(m)} title="Exportar para compartilhar">📤</button>
+            <button onClick={() => setEdit(m)}>Editar</button><button onClick={() => excluir(m)}>Excluir</button></div>)}</div></section>}
       {aba === "rank" && <section>
         <div className="card"><h3>REGRAS</h3>
           <label>Identificação do participante <select value={cfg.nome} onChange={(e) => setCfg({ ...cfg, nome: e.target.value as Cfg["nome"] })}>
@@ -155,7 +196,10 @@ function Sync({ m, fim }: { m: Musica; fim: () => void }) {
       const novoTempo = agora();
       setLs(ls.map((l, n) => {
         if (n === i) return { ...l, t: novoTempo };
-        if (n === i - 1) return { ...l, f: novoTempo };
+        if (n === i - 1) {
+          // SÓ automatiza o fim se o usuário ainda não tiver marcado o fim manualmente
+          return l.f === undefined ? { ...l, f: novoTempo - 0.1 } : l;
+        }
         return l;
       }));
     }

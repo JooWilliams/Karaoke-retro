@@ -112,7 +112,7 @@ function Carrossel({ ms, abrir, rank, msg }: { ms: Musica[]; abrir: (m: Musica) 
         {lista.map((m, n) => (
           <button key={m.id} className={`capa d${m.decada} ${n === i ? "foco" : ""}`} onClick={() => (n === i ? abrir(m) : setI(n))}
             style={capas[n] ? { backgroundImage: `linear-gradient(transparent 35%,rgba(0,0,0,.85)),url(${capas[n]})`, backgroundSize: "cover" } : undefined}>
-            <b>{rotulo(m.decada)}</b>{cantadas.includes(m.id as number) && <u>✓ JÁ CANTADA</u>}
+            <b>{rotulo(m.decada)}</b>
             <strong>{m.titulo}</strong><em>{m.artista} · {m.categoria}</em>{!sincronizada(m.letra) && <small>{m.letra.length ? "letra sem sincronia" : "sem letra"}</small>}
           </button>))}
       </div>
