@@ -18,6 +18,7 @@ export const listar = () => tx<Musica[]>("m", "readonly", (s) => s.getAll());
 export const obter = (id: number) => tx<Musica>("m", "readonly", (s) => s.get(id));
 export const salvar = async (m: Musica) => { await tx("m", "readwrite", (s) => s.put(m)); avisar(); };
 export const apagar = async (id: number) => { await tx("m", "readwrite", (s) => s.delete(id)); avisar(); };
+export const importar = async (m: Musica) => { await salvar(m); avisar(); };
 export const listarR = () => tx<Resultado[]>("r", "readonly", (s) => s.getAll());
 export const salvarR = async (r: Resultado) => { await tx("r", "readwrite", (s) => s.put(r)); avisar("vr"); };
 export const limparR = async () => { await tx("r", "readwrite", (s) => s.clear()); avisar("vr"); };
