@@ -55,6 +55,7 @@ export function Painel({ fechar }: { fechar: () => void }) {
       setAviso("Música importada com sucesso!");
     } catch { setAviso("Erro ao importar música. Arquivo inválido."); }
   };
+  const recarregar = () => listar().then(setMs);
   useAviso("v", recarregar);
   useAviso("vr", () => listarR().then(setRs));
   const tit = (id: number | null) => { const m = ms.find((x) => x.id === id); return m ? `${m.titulo} — ${m.artista}` : "(música removida)"; };
