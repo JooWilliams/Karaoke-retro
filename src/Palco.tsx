@@ -70,7 +70,7 @@ function ResTela({ tela, voltar }: { tela: { p: Pend; pontos?: number; pos?: num
   useEsc((e) => { if (e.key === "Escape" || e.key === "Enter") voltar(); });
   return (
     <div className="tela player"><small>RESULTADO</small><h2>{tela.p.nome}</h2><p className="aviso">{tela.p.titulo} — {tela.p.artista}</p>
-      {tela.a && <p className="aviso">Participação {tela.a.part}% · Ritmo {tela.a.ritmo}% · Afinação: não avaliada nesta versão</p>}
+      {tela.a && <p className="aviso">Participação {tela.a.part}% · Ritmo {tela.a.ritmo}%</p>}
       {tela.pontos === undefined ? <p className="aviso">Aguardando a pontuação do organizador…</p>
         : <><div className="nota">{tela.pontos}</div>{tela.pos ? <p className="pos">{tela.pos}º no ranking</p> : null}</>}
       <footer>ENTER ou ESC para voltar ao catálogo</footer></div>
@@ -116,7 +116,7 @@ function Carrossel({ ms, abrir, rank, msg }: { ms: Musica[]; abrir: (m: Musica) 
             <strong>{m.titulo}</strong><em>{m.artista} · {m.categoria}</em>{!sincronizada(m.letra) && <small>{m.letra.length ? "letra sem sincronia" : "sem letra"}</small>}
           </button>))}
       </div>
-      <footer>← → navegar · ENTER escolher música · R ranking · 0-3 década · F tela cheia · fila: {fila.length}</footer>
+      {/* <footer>← → navegar · ENTER escolher música · R ranking · 0-3 década · F tela cheia · fila: {fila.length}</footer> */}
     </div>
   );
 }
@@ -185,7 +185,7 @@ function Player({ m, nome, cfg, voltar, terminou }: { m: Musica; nome: string; c
         onError={() => setErro("Falha ao reproduzir o áudio desta música. Verifique o arquivo cadastrado.")} />
       <div className="barra"><div style={{ width: dur ? `${(t / dur) * 100}%` : 0 }} /></div>
       <div className="tempo"><span>{mmss(t)}</span><span>{rod ? "♪" : "❚❚"}</span><span>-{mmss(Math.max(0, dur - t))}</span></div>
-      <footer>ESPAÇO pausa · ← → ±5s · ↑ ↓ volume · R reiniciar · N/B bloco · [ ] atrasa/adianta a letra · ESC encerrar</footer>
+      {/* <footer>ESPAÇO pausa · ← → ±5s · ↑ ↓ volume · R reiniciar · N/B bloco · [ ] atrasa/adianta a letra · ESC encerrar</footer> */}
     </div>
   );
 }

@@ -62,7 +62,7 @@ export function Painel({ fechar }: { fechar: () => void }) {
   const quem = () => { const e = validarNome(nome, cfg); if (e) { setAviso(e); return null; } setAviso(""); localStorage.setItem("ultimoNome", nome.trim()); return nomeFinal(nome); };
   const cantar = (m: Musica, agora: boolean) => { const n = quem(); if (n === null) return; agora ? enviar({ c: "tocar", id: m.id, nome: n }) : setFila([...fila, { m: m.id as number, nome: n }]); };
   const proxima = () => { if (!fila.length) return; enviar({ c: "tocar", id: fila[0].m, nome: fila[0].nome }); setFila(fila.slice(1)); };
-  const mover = (i: number, d: number) => { const f = [...fila], j = i + d; if (j < 0 || j >= f.length) return; [f[i], f[j]] = [f[j], f[i]]; setFila(f); };
+  const mover = (i: number, d: number) => { const f = [...fila], j = i + d; if (j < 0 || j >= f.length) return;[f[i], f[j]] = [f[j], f[i]]; setFila(f); };
   const excluir = async (m: Musica) => { if (!confirm(`Excluir "${m.titulo}"?`)) return; await apagar(m.id as number); setFila(fila.filter((x) => x.m !== m.id)); recarregar(); };
   const salvarPts = async () => {
     const n = Number(pts);
